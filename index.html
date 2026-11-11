@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Bar La Esquina</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header id="encabezado">
+    <h1 id="nombre-bar">Bar La Esquina</h1>
+    <div id="acciones-datos">
+      <button type="button" id="btn-exportar">Exportar</button>
+      <button type="button" id="btn-importar">Importar</button>
+      <input type="file" id="input-importar" accept=".json,application/json" hidden>
+    </div>
+  </header>
+
+  <p id="mensaje-datos" role="status" hidden></p>
+
+  <nav id="menu-principal" aria-label="Secciones del sistema">
+    <ul>
+      <li><a href="#salon" id="enlace-salon">Salón</a></li>
+      <li><a href="#carta" id="enlace-carta">Carta</a></li>
+      <li><a href="#caja" id="enlace-caja">Caja del día</a></li>
+    </ul>
+  </nav>
+
+  <main id="contenido">
+
+    <!-- SALÓN -->
+    <section id="salon" aria-labelledby="titulo-salon">
+      <h2 id="titulo-salon">Salón</h2>
+
+      <div id="salon-layout">
+        <section id="mesas" aria-labelledby="titulo-mesas">
+          <h3 id="titulo-mesas">Mesas</h3>
+          <div id="grilla-mesas" role="list"></div>
+        </section>
+
+        <aside id="panel-pedido" aria-labelledby="titulo-pedido">
+          <h3 id="titulo-pedido">Pedido de la mesa</h3>
+          <p id="mesa-seleccionada">Ninguna mesa seleccionada</p>
+          <form id="form-item" hidden>
+            <label for="item-producto">Producto</label>
+            <select id="item-producto" name="producto" required></select>
+
+            <label for="item-cantidad">Cantidad</label>
+            <input type="number" id="item-cantidad" name="cantidad" min="1" step="1" inputmode="numeric" value="1" required>
+
+            <button type="submit" id="btn-agregar-item">Agregar</button>
+            <p id="error-item" role="alert" hidden></p>
+          </form>
+
+          <ul id="lista-pedido"></ul>
+          <p id="total-pedido">Total: <output id="valor-total-pedido"></output></p>
+
+          <div id="cierre-pedido" hidden>
+            <button type="button" id="btn-cerrar-cuenta">Cerrar cuenta</button>
+            <p id="error-cierre" role="alert" hidden></p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- CARTA -->
+    <section id="carta" aria-labelledby="titulo-carta">
+      <h2 id="titulo-carta">Carta</h2>
+
+      <form id="form-producto">
+        <fieldset>
+          <legend>Producto</legend>
+
+          <label for="producto-nombre">Nombre</label>
+          <input type="text" id="producto-nombre" name="nombre" required>
+
+          <label for="producto-categoria">Categoría</label>
+          <input type="text" id="producto-categoria" name="categoria" list="categorias-existentes" required>
+          <datalist id="categorias-existentes"></datalist>
+
+          <label for="producto-precio">Precio</label>
+          <input type="number" id="producto-precio" name="precio" min="0" step="0.01" inputmode="decimal" required>
+
+          <label for="producto-disponible">
+            <input type="checkbox" id="producto-disponible" name="disponible" checked>
+            Disponible
+          </label>
+
+          <p id="error-producto" role="alert" hidden></p>
+
+          <div id="acciones-form">
+            <button type="submit" id="btn-guardar-producto">Guardar producto</button>
+            <button type="button" id="btn-cancelar-edicion" hidden>Cancelar</button>
+          </div>
+        </fieldset>
+      </form>
+
+      <section id="productos" aria-labelledby="titulo-productos">
+        <h3 id="titulo-productos">Productos</h3>
+        <div id="lista-productos"></div>
+      </section>
+    </section>
+
+    <!-- CAJA DEL DÍA -->
+    <section id="caja" aria-labelledby="titulo-caja">
+      <h2 id="titulo-caja">Caja del día</h2>
+
+      <table id="tabla-caja">
+        <caption>Movimientos del día</caption>
+        <thead>
+          <tr>
+            <th scope="col">Hora</th>
+            <th scope="col">Mesa</th>
+            <th scope="col">Forma de pago</th>
+            <th scope="col">Total</th>
+          </tr>
+        </thead>
+        <tbody id="cuerpo-caja"></tbody>
+        <tfoot>
+          <tr class="subtotal-caja">
+            <th scope="row" colspan="3">💵 Subtotal efectivo</th>
+            <td id="subtotal-efectivo"></td>
+          </tr>
+          <tr class="subtotal-caja">
+            <th scope="row" colspan="3">💳 Subtotal débito</th>
+            <td id="subtotal-debito"></td>
+          </tr>
+          <tr class="subtotal-caja">
+            <th scope="row" colspan="3">🏦 Subtotal transferencia</th>
+            <td id="subtotal-transferencia"></td>
+          </tr>
+          <tr>
+            <th scope="row" colspan="3">Total recaudado</th>
+            <td id="total-caja"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </section>
+
+  </main>
+
+  <footer id="pie">
+    <small>Bar La Esquina</small>
+  </footer>
+
+  <!-- Diálogo: forma de pago al cerrar la cuenta -->
+  <dialog id="dialogo-cierre" aria-labelledby="titulo-cierre">
+    <form id="form-cierre">
+      <h3 id="titulo-cierre">Cerrar cuenta</h3>
+      <p id="resumen-cierre"></p>
+
+      <fieldset>
+        <legend>Forma de pago</legend>
+        <label><input type="radio" name="forma-pago" value="efectivo" checked> 💵 Efectivo</label>
+        <label><input type="radio" name="forma-pago" value="debito"> 💳 Débito</label>
+        <label><input type="radio" name="forma-pago" value="transferencia"> 🏦 Transferencia</label>
+      </fieldset>
+
+      <div class="acciones-dialogo">
+        <button type="submit" id="btn-confirmar-cierre">Confirmar</button>
+        <button type="button" id="btn-cancelar-cierre">Cancelar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Diálogo: ticket de la cuenta cerrada -->
+  <dialog id="dialogo-ticket" aria-label="Ticket de la cuenta">
+    <article id="ticket-contenido"></article>
+    <div class="acciones-dialogo">
+      <button type="button" id="btn-cerrar-ticket">Cerrar</button>
+    </div>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>

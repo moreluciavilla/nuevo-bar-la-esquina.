@@ -1,0 +1,992 @@
+/* ==========================================================
+   Bar La Esquina - styles.css
+   ========================================================== */
+
+/* 1. FUENTES ------------------------------------------------
+   Carga Poppins (títulos) e Inter (texto) desde Google Fonts. */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap");
+
+/* 2. VARIABLES ----------------------------------------------
+   Todos los colores, radios, sombras y fuentes en un solo lugar. */
+:root {
+  /* Paleta */
+  --naranja: #F2994A;
+  --naranja-oscuro: #D9822F;
+  --naranja-suave: #FDE8D2;
+  --cafe: #4E342E;
+  --cafe-claro: #7A5A50;
+  --crema: #FFF8EE;
+  --crema-oscuro: #F6EAD7;
+  --blanco: #FFFFFF;
+  --verde: #6FCF97;
+  --verde-oscuro: #4DB57A;
+  --rojo: #E5594F;
+  --borde: #EBDDC8;
+
+  /* Tipografías (con system-ui de respaldo sin internet) */
+  --fuente-titulos: "Poppins", system-ui, sans-serif;
+  --fuente-texto: "Inter", system-ui, sans-serif;
+
+  /* Forma y profundidad */
+  --radio: 16px;
+  --radio-chico: 10px;
+  --sombra: 0 4px 14px rgba(78, 52, 46, 0.10);
+  --sombra-fuerte: 0 8px 20px rgba(78, 52, 46, 0.18);
+  --transicion: 0.2s ease;
+}
+
+/* 3. RESET Y BASE -------------------------------------------
+   Normaliza tamaños y define el fondo crema y la fuente del texto. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%; /* iOS no agranda el texto al girar el celular */
+}
+
+html,
+body {
+  max-width: 100%;
+  overflow-x: clip; /* red de seguridad contra scroll horizontal; "clip" no rompe sticky */
+}
+
+body {
+  margin: 0;
+  font-family: var(--fuente-texto);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--cafe);
+  background: var(--crema);
+}
+
+h1, h2, h3 {
+  margin: 0 0 0.75rem;
+  font-family: var(--fuente-titulos);
+  color: var(--cafe);
+  line-height: 1.2;
+}
+
+/* Los hijos de grid/flex pueden empujar el ancho si tienen texto largo */
+#salon-layout > *,
+#carta > * {
+  min-width: 0;
+}
+
+/* Nombres largos se cortan en vez de desbordar la pantalla */
+h1, h2, h3, h4,
+.item-nombre,
+.producto-nombre {
+  overflow-wrap: anywhere;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* 4. ENCABEZADO ---------------------------------------------
+   Barra superior con el nombre del bar y los botones de datos. */
+#encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--blanco);
+  border-bottom: 3px solid var(--naranja);
+  box-shadow: var(--sombra);
+}
+
+#nombre-bar {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+#nombre-bar::before {
+  content: "🍻 ";
+}
+
+#acciones-datos {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Mensaje de exportar/importar (éxito o error) */
+#mensaje-datos {
+  margin: 0.75rem 1rem 0;
+  padding: 0.7rem 1rem;
+  border-radius: var(--radio-chico);
+  font-weight: 500;
+}
+
+#mensaje-datos[hidden] {
+  display: none;
+}
+
+#mensaje-datos.ok {
+  color: #2D6A4F;
+  background: #E3F6EA;
+}
+
+#mensaje-datos.ok::before {
+  content: "✅ ";
+}
+
+#mensaje-datos.error {
+  color: var(--rojo);
+  background: #FDECEA;
+}
+
+#mensaje-datos.error::before {
+  content: "⚠️ ";
+}
+
+/* 5. MENÚ DE NAVEGACIÓN -------------------------------------
+   Pestañas para cambiar de sección. La activa se resalta. */
+#menu-principal {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--crema);
+  padding: 0.75rem 1rem;
+}
+
+#menu-principal ul {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+}
+
+#menu-principal a {
+  display: inline-block;
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  background: var(--blanco);
+  color: var(--cafe);
+  font-family: var(--fuente-titulos);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: var(--sombra);
+  transition: background var(--transicion), color var(--transicion), transform var(--transicion);
+}
+
+#enlace-salon::before { content: "🪑 "; }
+#enlace-carta::before { content: "📋 "; }
+#enlace-caja::before  { content: "💰 "; }
+
+#menu-principal a:hover {
+  background: var(--naranja-suave);
+  transform: translateY(-2px);
+}
+
+/* Pestaña activa: la de la sección visible (Salón por defecto) */
+body:not(:has(#carta:target, #caja:target)) #enlace-salon,
+body:has(#carta:target) #enlace-carta,
+body:has(#caja:target) #enlace-caja {
+  background: var(--naranja);
+  color: var(--blanco);
+}
+
+/* 6. SECCIONES: SOLO UNA VISIBLE A LA VEZ -------------------
+   Se ocultan todas; se muestra la que coincide con el enlace
+   (#carta, #caja) y, si no hay ninguna elegida, el Salón. */
+#contenido {
+  padding: 1rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+#contenido > section {
+  display: none;
+}
+
+#contenido > section:target,
+#contenido:not(:has(:target)) > #salon {
+  display: block;
+}
+
+#contenido > section > h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+#titulo-salon::before { content: "🪑 "; }
+#titulo-carta::before { content: "📋 "; }
+#titulo-caja::before  { content: "💰 "; }
+
+/* 7. TARJETAS -----------------------------------------------
+   Estilo común: formularios, paneles, tabla y elementos de listas. */
+#form-producto,
+#panel-pedido,
+#productos,
+#tabla-caja,
+#lista-pedido li,
+#lista-productos li {
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+}
+
+#form-producto,
+#panel-pedido,
+#productos {
+  padding: 1rem;
+}
+
+#lista-pedido,
+#lista-productos {
+  display: grid;
+  gap: 0.6rem;
+}
+
+#lista-pedido li,
+#lista-productos li {
+  padding: 0.75rem 1rem;
+  transition: transform var(--transicion), box-shadow var(--transicion);
+}
+
+#lista-pedido li:hover,
+#lista-productos li:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sombra-fuerte);
+}
+
+/* 8. FORMULARIOS --------------------------------------------
+   Campos grandes y cómodos de tocar en el celular (mín. 44 px). */
+fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+legend {
+  padding: 0;
+  margin-bottom: 0.5rem;
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+legend::before {
+  content: "🍽️ ";
+}
+
+label {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--cafe-claro);
+}
+
+input[type="text"],
+input[type="number"] {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.65rem 0.8rem;
+  font: inherit;
+  color: var(--cafe);
+  background: var(--crema);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-chico);
+  transition: border-color var(--transicion), box-shadow var(--transicion);
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus {
+  outline: none;
+  border-color: var(--naranja);
+  box-shadow: 0 0 0 3px var(--naranja-suave);
+}
+
+input[type="checkbox"] {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-right: 0.4rem;
+  accent-color: var(--naranja);
+  vertical-align: middle;
+}
+
+/* Casilla "Disponible": toda la fila se puede tocar */
+label[for="producto-disponible"] {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+/* 9. BOTONES ------------------------------------------------
+   Naranja con hover: cambia de color y se eleva levemente. */
+button {
+  min-height: 44px;
+  padding: 0.65rem 1.1rem;
+  font-family: var(--fuente-texto);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--blanco);
+  background: var(--naranja);
+  border: 0;
+  border-radius: var(--radio-chico);
+  box-shadow: var(--sombra);
+  cursor: pointer;
+  transition: background var(--transicion), transform var(--transicion), box-shadow var(--transicion);
+}
+
+button:hover {
+  background: var(--naranja-oscuro);
+  transform: translateY(-2px);
+  box-shadow: var(--sombra-fuerte);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+button:focus-visible,
+#menu-principal a:focus-visible {
+  outline: 3px solid var(--cafe);
+  outline-offset: 2px;
+}
+
+#btn-exportar::before        { content: "📤 "; }
+#btn-importar::before        { content: "📥 "; }
+#btn-guardar-producto::before { content: "💾 "; }
+
+/* 10. SALÓN: MESAS Y PEDIDO ---------------------------------
+   Grilla de mesas cuadradas + panel lateral del pedido. */
+#salon-layout {
+  display: grid;
+  gap: 1rem;
+}
+
+#grilla-mesas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 0.75rem;
+}
+
+/* Mesa: tarjeta cuadrada grande. Libre = verde (por defecto). */
+.mesa {
+  aspect-ratio: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  font-family: var(--fuente-titulos);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--blanco);
+  background: var(--verde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+}
+
+.mesa::before {
+  content: "🪑";
+  font-size: 1.8rem;
+}
+
+.mesa:hover {
+  background: var(--verde-oscuro);
+}
+
+.mesa-numero {
+  line-height: 1.1;
+}
+
+.mesa-estado {
+  font-family: var(--fuente-texto);
+  font-size: 0.8rem;
+  font-weight: 500;
+  opacity: 0.95;
+}
+
+.mesa-total {
+  margin-top: 0.15rem;
+  padding: 0.15rem 0.6rem;
+  font-family: var(--fuente-texto);
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+}
+
+#lista-pedido li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.item-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 8rem;
+}
+
+.item-unitario {
+  color: var(--cafe-claro);
+}
+
+.item-controles {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.item-cantidad {
+  min-width: 1.5rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Botones − y +: 44 px para tocarlos con el dedo */
+.btn-cantidad {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+  border-radius: 50%;
+}
+
+.item-subtotal {
+  color: var(--naranja-oscuro);
+}
+
+/* Formulario para agregar productos al pedido */
+#form-item {
+  display: grid;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: var(--crema);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+}
+
+#form-item[hidden],
+#error-item[hidden],
+#error-cierre[hidden] {
+  display: none;
+}
+
+/* Cierre de cuenta */
+#cierre-pedido {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+#cierre-pedido[hidden] {
+  display: none;
+}
+
+#btn-cerrar-cuenta::before {
+  content: "🧾 ";
+}
+
+#error-cierre {
+  margin: 0;
+  padding: 0.5rem 0.7rem;
+  color: var(--rojo);
+  background: #FDECEA;
+  border-radius: var(--radio-chico);
+  font-size: 0.9rem;
+}
+
+/* Diálogos (forma de pago y ticket) */
+dialog {
+  width: min(92vw, 420px);
+  padding: 1.25rem;
+  color: var(--cafe);
+  background: var(--blanco);
+  border: 0;
+  border-radius: var(--radio);
+  box-shadow: var(--sombra-fuerte);
+}
+
+dialog::backdrop {
+  background: rgba(78, 52, 46, 0.45);
+}
+
+#form-cierre legend::before {
+  content: "💳 ";
+}
+
+#form-cierre fieldset label {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.65rem 0.8rem;
+  color: var(--cafe);
+  background: var(--crema);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-chico);
+  cursor: pointer;
+}
+
+input[type="radio"] {
+  margin-right: 0.5rem;
+  accent-color: var(--naranja);
+}
+
+.acciones-dialogo {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+#btn-cancelar-cierre,
+#btn-cerrar-ticket {
+  color: var(--cafe);
+  background: var(--crema-oscuro);
+}
+
+#btn-cancelar-cierre:hover,
+#btn-cerrar-ticket:hover {
+  background: var(--borde);
+}
+
+/* Ticket */
+#ticket-contenido {
+  font-family: "Courier New", ui-monospace, monospace;
+  font-size: 0.9rem;
+}
+
+#ticket-contenido h3 {
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.ticket-meta {
+  margin: 0.15rem 0;
+}
+
+.ticket-items {
+  margin: 0.75rem 0;
+  padding: 0.6rem 0;
+  border-top: 2px dashed var(--borde);
+  border-bottom: 2px dashed var(--borde);
+}
+
+.ticket-items li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.2rem 0;
+}
+
+.ticket-total {
+  display: flex;
+  justify-content: space-between;
+  margin: 0.5rem 0;
+  font-size: 1.15rem;
+}
+
+.ticket-gracias {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+/* Subtotales de la Caja */
+#tabla-caja tfoot .subtotal-caja th,
+#tabla-caja tfoot .subtotal-caja td {
+  background: var(--crema);
+  font-weight: 500;
+}
+
+#form-item button {
+  margin-top: 0.3rem;
+}
+
+#form-item button::before {
+  content: "➕ ";
+}
+
+#form-item button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+#error-item {
+  margin: 0;
+  padding: 0.5rem 0.7rem;
+  color: var(--rojo);
+  background: #FDECEA;
+  border-radius: var(--radio-chico);
+  font-size: 0.9rem;
+}
+
+select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.65rem 0.8rem;
+  font: inherit;
+  color: var(--cafe);
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-chico);
+}
+
+select:focus {
+  outline: none;
+  border-color: var(--naranja);
+  box-shadow: 0 0 0 3px var(--naranja-suave);
+}
+
+/* Ocupada = naranja */
+.mesa.ocupada,
+.mesa[data-estado="ocupada"] {
+  background: var(--naranja);
+}
+
+.mesa.ocupada:hover,
+.mesa[data-estado="ocupada"]:hover {
+  background: var(--naranja-oscuro);
+}
+
+/* Mesa elegida: anillo marrón alrededor */
+.mesa.seleccionada {
+  outline: 4px solid var(--cafe);
+  outline-offset: 2px;
+}
+
+#mesa-seleccionada {
+  margin: 0 0 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--naranja-suave);
+  border-radius: var(--radio-chico);
+  font-weight: 500;
+}
+
+#total-pedido {
+  margin: 1rem 0 0;
+  font-family: var(--fuente-titulos);
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+/* 11. CARTA: FORMULARIO Y LISTA -----------------------------
+   Producto no disponible se atenúa. */
+#carta {
+  gap: 1rem;
+}
+
+#lista-productos {
+  gap: 1.25rem;
+}
+
+.grupo-categoria h4 {
+  margin: 0 0 0.6rem;
+  font-family: var(--fuente-titulos);
+  font-size: 1.05rem;
+  color: var(--cafe);
+}
+
+.grupo-categoria h4::before {
+  content: "🍴 ";
+}
+
+.productos-grupo {
+  display: grid;
+  gap: 0.6rem;
+}
+
+#lista-productos li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.producto-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.producto-precio {
+  color: var(--naranja-oscuro);
+  font-weight: 600;
+}
+
+.producto-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#lista-productos li.no-disponible .producto-info {
+  opacity: 0.55;
+}
+
+/* Mensaje de error y acciones del formulario */
+#error-producto {
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  color: var(--rojo);
+  background: #FDECEA;
+  border-radius: var(--radio-chico);
+  font-weight: 500;
+}
+
+#error-producto:not([hidden])::before {
+  content: "⚠️ ";
+}
+
+#acciones-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* Botones secundario y peligro */
+.btn-secundario {
+  color: var(--cafe);
+  background: var(--naranja-suave);
+}
+
+.btn-secundario:hover {
+  background: var(--naranja);
+  color: var(--blanco);
+}
+
+.btn-peligro {
+  background: var(--rojo);
+}
+
+.btn-peligro:hover {
+  background: #C8443B;
+}
+
+#btn-cancelar-edicion {
+  color: var(--cafe);
+  background: var(--crema-oscuro);
+}
+
+#btn-cancelar-edicion:hover {
+  background: var(--borde);
+}
+
+/* Interruptor de disponible */
+.interruptor {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.interruptor input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.interruptor-pista {
+  position: relative;
+  width: 42px;
+  height: 24px;
+  background: var(--borde);
+  border-radius: 999px;
+  transition: background var(--transicion);
+}
+
+.interruptor-pista::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  background: var(--blanco);
+  border-radius: 50%;
+  box-shadow: var(--sombra);
+  transition: transform var(--transicion);
+}
+
+.interruptor input:checked + .interruptor-pista {
+  background: var(--verde);
+}
+
+.interruptor input:checked + .interruptor-pista::after {
+  transform: translateX(18px);
+}
+
+.interruptor input:focus-visible + .interruptor-pista {
+  outline: 3px solid var(--cafe);
+  outline-offset: 2px;
+}
+
+/* 12. CAJA: TABLA -------------------------------------------
+   Tabla dentro de una tarjeta, con scroll horizontal si no entra. */
+#tabla-caja {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  display: block;
+  overflow-x: auto;
+}
+
+#tabla-caja caption {
+  padding: 1rem;
+  text-align: left;
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  color: var(--cafe);
+}
+
+#tabla-caja th,
+#tabla-caja td {
+  padding: 0.7rem 1rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+#tabla-caja thead th {
+  background: var(--naranja);
+  color: var(--blanco);
+}
+
+#tabla-caja tbody tr:nth-child(even) {
+  background: var(--crema);
+}
+
+#tabla-caja tfoot th,
+#tabla-caja tfoot td {
+  background: var(--crema-oscuro);
+  font-weight: 700;
+}
+
+/* 13. PIE ---------------------------------------------------- */
+#pie {
+  padding: 1.5rem 1rem;
+  text-align: center;
+  color: var(--cafe-claro);
+}
+
+/* 14. ESCRITORIO / TABLET: DOS COLUMNAS DESDE 768 px ---------
+   Mobile first: lo de arriba es de una columna; acá se agrega la segunda. */
+@media (min-width: 768px) {
+  #encabezado {
+    padding: 1.25rem 2rem;
+  }
+
+  #menu-principal,
+  #contenido {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  /* Salón: mesas a la izquierda, pedido a la derecha */
+  #salon-layout {
+    grid-template-columns: 2fr 1fr;
+    align-items: start;
+  }
+
+  #panel-pedido {
+    position: sticky;
+    top: 4.5rem;
+  }
+
+  /* Carta: formulario a la izquierda, lista a la derecha */
+  #carta:target,
+  #contenido:has(#carta:target) > #carta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    align-items: start;
+  }
+
+  #carta > h2 {
+    grid-column: 1 / -1;
+    margin-bottom: 0;
+  }
+}
+
+/* 14b. AVISO DE CONEXIÓN ------------------------------------
+   Franja discreta arriba de todo; app.js la muestra solo sin internet. */
+#aviso-conexion {
+  margin: 0;
+  padding: 0.4rem 1rem;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--cafe);
+  background: var(--naranja-suave);
+  border-bottom: 1px solid var(--borde);
+}
+
+#aviso-conexion[hidden] {
+  display: none;
+}
+
+#aviso-conexion::before {
+  content: "📡 ";
+}
+
+/* 15. CELULAR (MENOS DE 600 px): MENÚ FIJO ABAJO -------------
+   Va al final para ganarle a las reglas anteriores. La barra
+   queda al alcance del pulgar y respeta la zona segura del iPhone. */
+@media (max-width: 599px) {
+  /* Espacio para que la barra no tape el contenido ni el pie */
+  body {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  }
+
+  #menu-principal {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.4rem 0.5rem calc(0.4rem + env(safe-area-inset-bottom));
+    background: var(--blanco);
+    border-top: 2px solid var(--naranja);
+    box-shadow: 0 -4px 14px rgba(78, 52, 46, 0.12);
+  }
+
+  #menu-principal ul {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+    overflow: visible;
+  }
+
+  #menu-principal a {
+    display: flex;
+    flex-direction: column;     /* ícono arriba, texto abajo */
+    align-items: center;
+    justify-content: center;
+    min-height: 56px;           /* cómodo para el pulgar */
+    padding: 0.3rem;
+    font-size: 0.8rem;
+    border-radius: var(--radio-chico);
+    box-shadow: none;
+    background: transparent;
+  }
+
+  #menu-principal a::before {
+    font-size: 1.4rem;
+    line-height: 1.2;
+  }
+
+  #menu-principal a:hover {
+    transform: none;            /* sin "salto" al tocar */
+  }
+}
